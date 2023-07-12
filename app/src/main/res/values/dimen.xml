@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_large">16dp</dimen>
+    <dimen name="space_normal">12dp</dimen>
+    <dimen name="space_small">8dp</dimen>
+
+    <dimen name="big_header">25sp</dimen>
+    <dimen name="header">20sp</dimen>
+    <dimen name="subHeader">18sp</dimen>
+
+    <dimen name="content_big">15sp</dimen>
+    <dimen name="content">13sp</dimen>
+</resources>
