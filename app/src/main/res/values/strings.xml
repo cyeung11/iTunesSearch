@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">iTunesSearch</string>
+
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <string name="fav">Favorites</string>
+    <string name="lang">Language</string>
 </resources>

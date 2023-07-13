@@ -10,27 +10,20 @@
         android:layout_height="match_parent"
         android:padding="@dimen/space_normal">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardViewPhoto"
+        <ImageView
+            android:id="@+id/imgPhoto"
             android:layout_width="60dp"
             android:layout_height="60dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:cardElevation="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <ImageView
-                android:id="@+id/imgPhoto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"/>
-
-        </androidx.cardview.widget.CardView>
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/img_example"
+            android:scaleType="fitCenter"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/cardViewPhoto"
+            app:layout_constraintStart_toEndOf="@id/imgPhoto"
             app:layout_constraintEnd_toStartOf="@id/btnFav"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -43,7 +36,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/txtName"
-                    android:textSize="@dimen/header"
+                    android:textSize="@dimen/content_xl"
                     android:textColor="@color/text_color"
                     tools:text="Jack Johnson"/>
 
@@ -51,7 +44,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/txtArtist"
-                    android:textSize="@dimen/content_big"
+                    android:textSize="@dimen/content_m"
                     android:textColor="@color/hint_color"
                     tools:text="This Bike Is a Pipe Bomb"/>
 
