@@ -5,5 +5,5 @@ import retrofit2.http.QueryMap
 
 interface SearchAPI {
     @GET("search")
-    suspend fun getPage(@QueryMap params: HashMap<String, String>) : SearchResponse
+    suspend fun getPage(@QueryMap params: HashMap<String, Any>) : SearchResponse
 }

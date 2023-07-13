@@ -15,23 +15,58 @@ class HomeViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
-
     data class HomeState(
         var isLoading: Boolean = false,
         var query: String? = null,
-        var response: SearchResponse? = null
+        var entities: ArrayList<Entity> = arrayListOf(),
+        var lang: String = "en"
     )
 
+    fun changeLang(lang: String) {
+        if (lang != _uiState.value.lang) {
+            _uiState.update { it.copy(lang = lang) }
+            _uiState.value.query?.let {
+                search(it)
+            }
+        }
+    }
+
     fun search(query: String) {
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true, query = query, entities = arrayListOf()) }
         CoroutineScope(Dispatchers.IO).launch {
-            val queryMap = HashMap<String, String>()
+            val queryMap = HashMap<String, Any>()
             queryMap["term"] = query
+            queryMap["lang"] = _uiState.value.lang
+            queryMap["limit"] = 20
 
             val response = RetrofitClient.getApi().getPage(queryMap)
 
             _uiState.update {
-               HomeState(false, query, response)
+                it.copy(isLoading = false, entities = ArrayList(response.results ?: listOf()))
+            }
+        }
+    }
+
+    fun loadMore() {
+        if (!_uiState.value.isLoading) {
+            if (_uiState.value.query != null && _uiState.value.entities.isNotEmpty()) {
+                _uiState.update { it.copy(isLoading = true) }
+                CoroutineScope(Dispatchers.IO).launch {
+                    val queryMap = HashMap<String, Any>()
+                    val size = _uiState.value.entities.size
+                    queryMap["term"] = _uiState.value.query ?: ""
+                    queryMap["lang"] = _uiState.value.lang
+                    queryMap["offset"] = size
+                    queryMap["limit"] = 20
+
+                    val response = RetrofitClient.getApi().getPage(queryMap)
+
+                    _uiState.update {
+                        it.copy(isLoading = false, entities = it.entities.also {
+                            response.results?.let { it1 -> it.addAll(it1) }
+                        })
+                    }
+                }
             }
         }
     }
