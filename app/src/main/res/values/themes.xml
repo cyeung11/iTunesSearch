@@ -17,4 +17,10 @@
         <item name="searchHintIcon">@null</item>
     </style>
 
+    <style name="BaseBottomSheetTheme" parent="@style/Theme.Design.BottomSheetDialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowFullscreen">false</item>
+    </style>
+
 </resources>

@@ -19,6 +19,81 @@
             android:id="@+id/toolbar"
             app:title="@string/app_name"/>
 
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:id="@+id/scrollViewFilter">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingVertical="@dimen/space_small"
+                android:paddingHorizontal="@dimen/space_normal"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/llTypeFilter"
+                    android:background="@drawable/bg_border_rounded"
+                    android:orientation="horizontal"
+                    android:paddingVertical="@dimen/space_small"
+                    android:paddingHorizontal="@dimen/space_normal"
+                    android:layout_marginHorizontal="@dimen/space_extra_small"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/txtMedia"
+                        android:text="@string/media_type"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/content_l"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:visibility="gone"
+                        android:id="@+id/imgTypeFilterClear"
+                        android:src="@drawable/btn_close"
+                        app:tint="@color/white"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/llCountryFilter"
+                    android:background="@drawable/bg_border_rounded"
+                    android:orientation="horizontal"
+                    android:paddingVertical="@dimen/space_small"
+                    android:paddingHorizontal="@dimen/space_normal"
+                    android:layout_marginHorizontal="@dimen/space_extra_small"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/txtCountry"
+                        android:text="@string/country"
+                        android:textColor="@color/text_color"
+                        android:textSize="@dimen/content_l"/>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:visibility="gone"
+                        android:id="@+id/imgCountryFilterClear"
+                        android:src="@drawable/btn_close"
+                        app:tint="@color/white"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="0dp"
