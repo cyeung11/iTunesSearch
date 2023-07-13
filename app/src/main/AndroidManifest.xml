@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ITunesSearch"
-        tools:targetApi="31">
+        android:localeConfig="@xml/locale_config">
 
         <activity android:name=".HomeAct"
             android:exported="true">

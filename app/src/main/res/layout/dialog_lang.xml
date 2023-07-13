@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/bg_white_rounded"
     android:orientation="vertical"
-    android:paddingTop="40dp"
-    android:paddingBottom="30dp">
+    android:paddingVertical="@dimen/space_large">
 
     <TextView
         android:id="@+id/txtTitle"
@@ -16,13 +13,13 @@
         android:layout_marginHorizontal="@dimen/space_normal"
         android:layout_marginBottom="@dimen/space_normal"
         android:gravity="center"
-        android:text="Select language"
+        android:text="@string/select_language"
         android:textColor="@color/text_color" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/space_normal"
+        android:layout_marginHorizontal="@dimen/space_small"
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
@@ -30,7 +27,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="40dp"
-            android:background="?selectableItemBackground"
+            android:background="?selectableItemBackgroundBorderless"
             android:gravity="center"
             android:text="@string/lang_en"
             android:textColor="@color/text_color"
@@ -41,7 +38,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="40dp"
-            android:background="?selectableItemBackground"
+            android:background="?selectableItemBackgroundBorderless"
             android:gravity="center"
             android:text="@string/lang_zh"
             android:textColor="@color/text_color"
@@ -52,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="40dp"
-            android:background="?selectableItemBackground"
+            android:background="?selectableItemBackgroundBorderless"
             android:gravity="center"
             android:text="@string/lang_cn"
             android:textColor="@color/text_color"
