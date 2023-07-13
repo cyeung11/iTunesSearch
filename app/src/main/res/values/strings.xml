@@ -11,4 +11,5 @@
     <string name="lang_cn" translatable="false">简</string>
     <string name="select_language">Select language</string>
     <string name="loading">Loading</string>
+    <string name="result_for">Result of \'%s\'</string>
 </resources>

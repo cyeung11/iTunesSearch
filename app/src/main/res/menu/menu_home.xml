@@ -10,11 +10,5 @@
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
-    <item android:id="@+id/lang"
-        android:title="@string/lang"
-        android:iconTint="@color/grey"
-        android:icon="@drawable/btn_lang"
-        app:showAsAction="always" />
-
 </menu>
 

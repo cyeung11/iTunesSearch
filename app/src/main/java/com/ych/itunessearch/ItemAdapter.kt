@@ -33,8 +33,8 @@ class ItemAdapter(private val act: HomeAct) :
             }
         }
 
-    inner class LoadingHolder(val binding: ItemLoadingBinding): ViewHolder(binding.root)
-    inner class EntityHolder(val binding: ItemEntryBinding) : ViewHolder(binding.root), View.OnClickListener {
+    inner class LoadingHolder(binding: ItemLoadingBinding): ViewHolder(binding.root)
+    inner class EntityHolder(private val binding: ItemEntryBinding) : ViewHolder(binding.root), View.OnClickListener {
 
         var entity: Entity? = null
 
@@ -50,7 +50,7 @@ class ItemAdapter(private val act: HomeAct) :
 
         fun bind(entity: Entity) {
             this.entity = entity
-            binding.txtName.text = entity.trackName
+            binding.txtName.text = entity.trackName ?: entity.collectionName
             binding.txtArtist.text = entity.artistName
             Glide.with(binding.imgPhoto).load(entity.artworkUrl100).into(binding.imgPhoto)
         }

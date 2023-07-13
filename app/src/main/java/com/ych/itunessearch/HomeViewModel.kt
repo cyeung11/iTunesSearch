@@ -2,7 +2,6 @@ package com.ych.itunessearch
 
 import androidx.lifecycle.ViewModel
 import com.ych.itunessearch.http.RetrofitClient
-import com.ych.itunessearch.http.SearchResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
