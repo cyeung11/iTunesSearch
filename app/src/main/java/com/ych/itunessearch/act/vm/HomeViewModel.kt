@@ -40,6 +40,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private var reachBottom: Boolean = false
+
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
     data class HomeState(
@@ -48,7 +50,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         var items: ArrayList<MediaDetail> = arrayListOf(),
         var lang: String = "en",
         var country: MediaFilter? = null,
-        var mediaType: MediaFilter? = null
+        var mediaType: MediaFilter? = null,
     )
 
     fun changeLang(lang: String) {
@@ -66,6 +68,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                country: MediaFilter? = _uiState.value.country,
                mediaType: MediaFilter? = _uiState.value.mediaType) {
         if (!query.isNullOrBlank()) {
+            reachBottom = false
             _uiState.update { it.copy(isLoading = true, query = query, country = country, mediaType = mediaType, items = arrayListOf()) }
             CoroutineScope(Dispatchers.IO).launch {
                 val queryMap = HashMap<String, Any>()
@@ -106,7 +109,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadMore() {
-        if (!_uiState.value.isLoading) {
+        if (!_uiState.value.isLoading && !reachBottom) {
             if (_uiState.value.query != null && _uiState.value.items.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
                 CoroutineScope(Dispatchers.IO).launch {
@@ -128,6 +131,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                             override fun onResponse(
                                 call: Call<SearchResponse>,
                                 response: Response<SearchResponse>) {
+                                if (response.isSuccessful && response.body()?.results != null && response.body()!!.results!!.size < 20) {
+                                    reachBottom = true
+                                }
                                 _uiState.update {
                                     it.copy(isLoading = false, items = it.items.also {
                                         response.body()?.results?.let { it1 -> it.addAll(it1) }
