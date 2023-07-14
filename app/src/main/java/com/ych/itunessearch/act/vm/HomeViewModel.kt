@@ -1,10 +1,12 @@
 package com.ych.itunessearch.act.vm
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.ych.itunessearch.database.AppDatabase
 import com.ych.itunessearch.http.RetrofitClient
+import com.ych.itunessearch.http.SearchResponse
 import com.ych.itunessearch.model.MediaDetail
 import com.ych.itunessearch.model.MediaFilter
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +16,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.lang.Exception
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -46,8 +52,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     fun changeLang(lang: String) {
-        if (lang != _uiState.value.lang) {
-            _uiState.update { it.copy(lang = lang) }
+        val newLang = if (lang.startsWith("en-")) "en" else lang
+        if (newLang != _uiState.value.lang) {
+            _uiState.update { it.copy(lang = newLang) }
             _uiState.value.query?.let {
                 search(query = it)
             }
@@ -63,7 +70,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             CoroutineScope(Dispatchers.IO).launch {
                 val queryMap = HashMap<String, Any>()
                 queryMap["term"] = query
-                queryMap["lang"] = _uiState.value.lang
                 if (country != null) {
                     queryMap["country"] = country.getRequestValue()
                 }
@@ -73,10 +79,25 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 queryMap["lang"] = _uiState.value.lang
                 queryMap["limit"] = 20
 
-                val response = RetrofitClient.getApi().getPage(queryMap)
+                try {
+                    RetrofitClient.getApi().getPage(queryMap).enqueue(object : Callback<SearchResponse> {
+                        override fun onResponse(
+                            call: Call<SearchResponse>,
+                            response: Response<SearchResponse>) {
+                            _uiState.update {
+                                it.copy(isLoading = false, items = ArrayList(response.body()?.results ?: listOf()))
+                            }
+                        }
 
-                _uiState.update {
-                    it.copy(isLoading = false, items = ArrayList(response.results ?: listOf()))
+                        override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                            Log.e("HomeViewModel", "search", t)
+                        }
+                    })
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _uiState.update {
+                        it.copy(isLoading = false)
+                    }
                 }
             }
         } else {
@@ -102,12 +123,27 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     queryMap["offset"] = size
                     queryMap["limit"] = 20
 
-                    val response = RetrofitClient.getApi().getPage(queryMap)
+                    try {
+                        RetrofitClient.getApi().getPage(queryMap).enqueue(object : Callback<SearchResponse> {
+                            override fun onResponse(
+                                call: Call<SearchResponse>,
+                                response: Response<SearchResponse>) {
+                                _uiState.update {
+                                    it.copy(isLoading = false, items = it.items.also {
+                                        response.body()?.results?.let { it1 -> it.addAll(it1) }
+                                    })
+                                }
+                            }
 
-                    _uiState.update {
-                        it.copy(isLoading = false, items = it.items.also {
-                            response.results?.let { it1 -> it.addAll(it1) }
+                            override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                                Log.e("HomeViewModel", "loadMore", t)
+                            }
                         })
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        _uiState.update {
+                            it.copy(isLoading = false)
+                        }
                     }
                 }
             }
