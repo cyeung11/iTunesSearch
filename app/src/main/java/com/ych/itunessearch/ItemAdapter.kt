@@ -10,12 +10,17 @@ import com.bumptech.glide.Glide
 import com.ych.itunessearch.databinding.ItemEntryBinding
 import com.ych.itunessearch.databinding.ItemLoadingBinding
 
-class ItemAdapter(private val act: HomeAct) :
+class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
     RecyclerView.Adapter<ViewHolder>() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(act)
 
-    var entities = listOf<Entity>()
+    var favIds = listOf<Int>()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+    var items = listOf<ITunesDetail>()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -26,9 +31,9 @@ class ItemAdapter(private val act: HomeAct) :
             if (field != value) {
                 field = value
                 if (value) {
-                    notifyItemInserted(entities.size)
+                    notifyItemInserted(items.size)
                 } else {
-                    notifyItemRemoved(entities.size)
+                    notifyItemRemoved(items.size)
                 }
             }
         }
@@ -36,23 +41,27 @@ class ItemAdapter(private val act: HomeAct) :
     inner class LoadingHolder(binding: ItemLoadingBinding): ViewHolder(binding.root)
     inner class EntityHolder(private val binding: ItemEntryBinding) : ViewHolder(binding.root), View.OnClickListener {
 
-        var entity: Entity? = null
+        var item: ITunesDetail? = null
 
         init {
-            binding.root.setOnClickListener(this)
+            binding.btnFav.setOnClickListener(this)
         }
 
         override fun onClick(v: View) {
-            if (entity != null) {
-
+            if (item != null) {
+                delegate.toggleFavourite(item!!, favIds.contains(item!!.trackId))
             }
         }
 
-        fun bind(entity: Entity) {
-            this.entity = entity
+        fun bind(entity: ITunesDetail) {
+            this.item = entity
             binding.txtName.text = entity.trackName ?: entity.collectionName
             binding.txtArtist.text = entity.artistName
             Glide.with(binding.imgPhoto).load(entity.artworkUrl100).into(binding.imgPhoto)
+
+            binding.btnFav.setImageResource(
+                if (favIds.contains(entity.trackId)) R.drawable.btn_fav else R.drawable.btn_unfav
+            )
         }
     }
 
@@ -75,24 +84,28 @@ class ItemAdapter(private val act: HomeAct) :
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (isLoading && position == entities.size) 0 else 1
+        return if (isLoading && position == items.size) 0 else 1
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (position < entities.size && holder is EntityHolder) {
-            holder.bind(entities[position])
+        if (position < items.size && holder is EntityHolder) {
+            holder.bind(items[position])
         }
     }
 
     override fun getItemCount(): Int {
-        return entities.size + (if (isLoading) 1 else 0)
+        return items.size + (if (isLoading) 1 else 0)
     }
 
     override fun getItemId(position: Int): Long {
-        if (position < entities.size) {
-            return entities[position].trackId.toLong()
+        if (position < items.size) {
+            return items[position].trackId.toLong()
         } else {
             return -1
         }
+    }
+
+    interface FavToggleDelegate {
+        fun toggleFavourite(item: ITunesDetail, wasFav: Boolean)
     }
 }

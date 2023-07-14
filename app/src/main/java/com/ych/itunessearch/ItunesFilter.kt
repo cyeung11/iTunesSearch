@@ -26,9 +26,12 @@ data class ItunesFilter(val text: String, val value: String): FilterAdapter.Filt
             )
         }
 
-        val countryFilters = Locale.getISOCountries().map {
-            Log.d("filter", it + Locale("", it).displayName)
-            ItunesFilter(Locale("", it).displayCountry, it)
+        fun getCountryFilters(context: Context): List<ItunesFilter> {
+            val locale = context.resources.configuration.locale
+            return Locale.getISOCountries().map {
+                Log.d("filter", it + Locale("", it).displayName)
+                ItunesFilter(Locale("", it).getDisplayCountry(locale), it)
+            }
         }
     }
 }

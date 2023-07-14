@@ -1,8 +1,8 @@
 package com.ych.itunessearch.http
 
-import com.ych.itunessearch.Entity
+import com.ych.itunessearch.ITunesDetail
 
 data class SearchResponse(
     val resultCount: Int?,
-    val results: List<Entity>?
+    val results: List<ITunesDetail>?
 )

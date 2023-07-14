@@ -1,9 +1,8 @@
 package com.ych.itunessearch
 
-import android.content.res.Configuration
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -26,13 +25,13 @@ import com.google.android.material.navigation.NavigationView.OnNavigationItemSel
 import com.ych.itunessearch.databinding.ActHomeBinding
 import kotlinx.coroutines.launch
 
-class HomeAct : AppCompatActivity() {
+class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
 
     private lateinit var homeBinding: ActHomeBinding
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private val adapter: ItemAdapter by lazy { ItemAdapter(this) }
+    private val adapter: ItemAdapter by lazy { ItemAdapter(this, this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +47,12 @@ class HomeAct : AppCompatActivity() {
 
         homeBinding.navView.setNavigationItemSelectedListener(object: OnNavigationItemSelectedListener{
             override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                LanguageDialog(this@HomeAct).show()
-                homeBinding.drawerLayout.closeDrawer(GravityCompat.START)
+                if (item.itemId == R.id.lang) {
+                    LanguageDialog(this@HomeAct).show()
+                    homeBinding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else if (item.itemId == R.id.fav) {
+                    startActivity(Intent(this@HomeAct, FavAct::class.java))
+                }
                 return false
             }
         })
@@ -69,7 +72,7 @@ class HomeAct : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
-                    adapter.entities = it.entities
+                    adapter.items = it.items
                     adapter.isLoading = it.isLoading
 
                     homeBinding.toolbar.title = if (it.query.isNullOrBlank())
@@ -126,7 +129,7 @@ class HomeAct : AppCompatActivity() {
             dialog.show()
         }
         homeBinding.txtCountry.setOnClickListener {
-            val dialog = FilterDialog.newInstance(this, ItunesFilter.countryFilters)
+            val dialog = FilterDialog.newInstance(this, ItunesFilter.getCountryFilters(this))
             dialog.listener = object : FilterAdapter.OnFilterSelectListener{
                 override fun onFilterSelect(filter: FilterAdapter.Filter) {
                     dialog.dismiss()
@@ -134,6 +137,10 @@ class HomeAct : AppCompatActivity() {
                 }
             }
             dialog.show()
+        }
+
+        viewModel.savedItemIds.observe(this) {
+            adapter.favIds = it
         }
     }
 
@@ -182,6 +189,14 @@ class HomeAct : AppCompatActivity() {
     override fun onLocalesChanged(locales: LocaleListCompat) {
         super.onLocalesChanged(locales)
         setupVMLang()
+    }
+
+    override fun toggleFavourite(item: ITunesDetail, wasFav: Boolean) {
+        if (wasFav) {
+            viewModel.removeFav(item)
+        } else {
+            viewModel.addToFav(item)
+        }
     }
 
     private fun setupVMLang() {

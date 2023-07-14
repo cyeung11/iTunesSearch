@@ -1,6 +1,9 @@
 package com.ych.itunessearch
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import com.ych.itunessearch.database.AppDatabase
 import com.ych.itunessearch.http.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,14 +13,33 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val database = AppDatabase.getInstance(application)
+    val savedItemIds: LiveData<List<Int>> by lazy {
+        database.favDao().getAllId()
+    }
+
+    fun addToFav(entry: ITunesDetail) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            database.favDao().insert(entry.toItem())
+        }
+    }
+
+    fun removeFav(entry: ITunesDetail) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            database.favDao().delete(entry.toItem())
+        }
+    }
 
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState.asStateFlow()
     data class HomeState(
         var isLoading: Boolean = false,
         var query: String? = null,
-        var entities: ArrayList<Entity> = arrayListOf(),
+        var items: ArrayList<ITunesDetail> = arrayListOf(),
         var lang: String = "en",
         var country: FilterAdapter.Filter? = null,
         var mediaType: FilterAdapter.Filter? = null
@@ -33,7 +55,7 @@ class HomeViewModel : ViewModel() {
     }
 
     fun search(query: String) {
-        _uiState.update { it.copy(isLoading = true, query = query, entities = arrayListOf()) }
+        _uiState.update { it.copy(isLoading = true, query = query, items = arrayListOf()) }
         CoroutineScope(Dispatchers.IO).launch {
             val queryMap = HashMap<String, Any>()
             queryMap["term"] = query
@@ -49,14 +71,14 @@ class HomeViewModel : ViewModel() {
             val response = RetrofitClient.getApi().getPage(queryMap)
 
             _uiState.update {
-                it.copy(isLoading = false, entities = ArrayList(response.results ?: listOf()))
+                it.copy(isLoading = false, items = ArrayList(response.results ?: listOf()))
             }
         }
     }
 
     fun filter(country: FilterAdapter.Filter?, mediaType: FilterAdapter.Filter?) {
         if (!_uiState.value.query.isNullOrBlank()) {
-            _uiState.update { it.copy(isLoading = true, country = country, mediaType = mediaType, entities = arrayListOf()) }
+            _uiState.update { it.copy(isLoading = true, country = country, mediaType = mediaType, items = arrayListOf()) }
             CoroutineScope(Dispatchers.IO).launch {
                 val queryMap = HashMap<String, Any>()
                 queryMap["term"] = _uiState.value.query!!
@@ -73,7 +95,7 @@ class HomeViewModel : ViewModel() {
                 val response = RetrofitClient.getApi().getPage(queryMap)
 
                 _uiState.update {
-                    it.copy(isLoading = false, entities = ArrayList(response.results ?: listOf()))
+                    it.copy(isLoading = false, items = ArrayList(response.results ?: listOf()))
                 }
             }
         } else {
@@ -83,11 +105,11 @@ class HomeViewModel : ViewModel() {
 
     fun loadMore() {
         if (!_uiState.value.isLoading) {
-            if (_uiState.value.query != null && _uiState.value.entities.isNotEmpty()) {
+            if (_uiState.value.query != null && _uiState.value.items.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
                 CoroutineScope(Dispatchers.IO).launch {
                     val queryMap = HashMap<String, Any>()
-                    val size = _uiState.value.entities.size
+                    val size = _uiState.value.items.size
                     queryMap["term"] = _uiState.value.query ?: ""
                     queryMap["lang"] = _uiState.value.lang
                     queryMap["offset"] = size
@@ -96,7 +118,7 @@ class HomeViewModel : ViewModel() {
                     val response = RetrofitClient.getApi().getPage(queryMap)
 
                     _uiState.update {
-                        it.copy(isLoading = false, entities = it.entities.also {
+                        it.copy(isLoading = false, items = it.items.also {
                             response.results?.let { it1 -> it.addAll(it1) }
                         })
                     }

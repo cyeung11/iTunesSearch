@@ -19,7 +19,6 @@ class FilterAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilterViewHolder {
         val binding = ItemFilterBinding.inflate(layoutInflater, parent, false)
         return FilterViewHolder(binding)
-
     }
 
     override fun onBindViewHolder(vh: FilterViewHolder, position: Int) {

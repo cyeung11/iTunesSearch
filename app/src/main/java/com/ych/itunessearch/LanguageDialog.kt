@@ -40,15 +40,20 @@ class LanguageDialog(
     }
 
     override fun onClick(v: View?) {
+        // Store it to pref to restore it next time application starts
+        val pref = SharedPref.getInstance(context)
         val locale: Locale
         when (v?.id) {
             R.id.btnCn -> {
+                pref.setValue("lang", 2)
                 locale = Locale("zh", "CN")
             }
             R.id.btnEn -> {
+                pref.setValue("lang", 0)
                 locale = Locale("en", "US")
             }
             R.id.btnZh -> {
+                pref.setValue("lang", 1)
                 locale = Locale("zh", "HK")
             }
             else -> {

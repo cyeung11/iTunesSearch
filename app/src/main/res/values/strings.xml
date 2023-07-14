@@ -23,5 +23,6 @@
     <string name="media_type_music">Music</string>
     <string name="media_type_audio_book">Audio Book</string>
     <string name="media_type_tv">TV Show</string>
+    <string name="no_saved_item">No saved item</string>
 
 </resources>

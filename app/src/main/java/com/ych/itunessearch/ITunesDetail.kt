@@ -1,6 +1,8 @@
 package com.ych.itunessearch
 
-data class Entity(
+import com.ych.itunessearch.database.ITunesItem
+
+data class ITunesDetail(
     val artistId: Int,
     val artistName: String?,
     val artistViewUrl: String?,
@@ -32,4 +34,14 @@ data class Entity(
     val trackTimeMillis: Int,
     val trackViewUrl: String?,
     val wrapperType: String?
-)
+) {
+    fun toItem(): ITunesItem{
+        return ITunesItem(
+            artistName = artistName,
+            artworkUrl100 = artworkUrl100,
+            collectionName = collectionName,
+            trackId = trackId,
+            trackName = trackName
+        )
+    }
+}

@@ -48,7 +48,7 @@
         android:layout_height="48dp"
         android:id="@+id/btnFav"
         android:src="@drawable/btn_unfav"
-        android:background="@android:color/transparent" />
+        android:background="?selectableItemBackground" />
 
 </LinearLayout>
 
