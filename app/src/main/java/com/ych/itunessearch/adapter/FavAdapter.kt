@@ -1,4 +1,4 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.adapter
 
 import android.app.Activity
 import android.view.LayoutInflater
@@ -8,23 +8,24 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
-import com.ych.itunessearch.database.ITunesItem
-import com.ych.itunessearch.databinding.ItemEntryBinding
+import com.ych.itunessearch.R
+import com.ych.itunessearch.model.MediaItem
+import com.ych.itunessearch.databinding.ItemMediaBinding
 
 class FavAdapter(act: Activity, private val delegate: RemoveFavDelegate) :
-    RecyclerView.Adapter<FavAdapter.EntityHolder>() {
+    RecyclerView.Adapter<FavAdapter.MediaHolder>() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(act)
 
-    var items = listOf<ITunesItem>()
+    var items = listOf<MediaItem>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    inner class EntityHolder(private val binding: ItemEntryBinding) : ViewHolder(binding.root), View.OnClickListener {
+    inner class MediaHolder(private val binding: ItemMediaBinding) : ViewHolder(binding.root), View.OnClickListener {
 
-        var item: ITunesItem? = null
+        var item: MediaItem? = null
 
         init {
             binding.btnFav.setOnClickListener(this)
@@ -37,24 +38,24 @@ class FavAdapter(act: Activity, private val delegate: RemoveFavDelegate) :
             }
         }
 
-        fun bind(entity: ITunesItem) {
-            this.item = entity
-            binding.txtName.text = entity.trackName ?: entity.collectionName
-            binding.txtArtist.text = entity.artistName
-            Glide.with(binding.imgPhoto).load(entity.artworkUrl100).into(binding.imgPhoto)
+        fun bind(media: MediaItem) {
+            this.item = media
+            binding.txtName.text = media.name
+            binding.txtArtist.text = media.artistName
+            Glide.with(binding.imgPhoto).load(media.artwork).into(binding.imgPhoto)
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityHolder {
-        val binding = ItemEntryBinding.inflate(layoutInflater)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaHolder {
+        val binding = ItemMediaBinding.inflate(layoutInflater)
         binding.root.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        return EntityHolder(binding)
+        return MediaHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: EntityHolder, position: Int) {
+    override fun onBindViewHolder(holder: MediaHolder, position: Int) {
         holder.bind(items[position])
     }
 
@@ -63,10 +64,10 @@ class FavAdapter(act: Activity, private val delegate: RemoveFavDelegate) :
     }
 
     override fun getItemId(position: Int): Long {
-        return items[position].trackId.toLong()
+        return items[position].id.toLong()
     }
 
     interface RemoveFavDelegate {
-        fun removeFav(item: ITunesItem)
+        fun removeFav(item: MediaItem)
     }
 }

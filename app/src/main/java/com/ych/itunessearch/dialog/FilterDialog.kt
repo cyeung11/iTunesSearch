@@ -1,4 +1,4 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.dialog
 
 import android.app.Activity
 import android.graphics.Color
@@ -8,12 +8,15 @@ import android.view.Window
 import android.widget.FrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.ych.itunessearch.R
+import com.ych.itunessearch.adapter.FilterAdapter
 import com.ych.itunessearch.databinding.BottomsheetFilterBinding
+import com.ych.itunessearch.model.MediaFilter
 
 
 class FilterDialog private constructor(
     private val act: Activity,
-    private val data: List<FilterAdapter.Filter>
+    private val data: List<MediaFilter>
 ) : BottomSheetDialog(act, R.style.BaseBottomSheetTheme), FilterAdapter.OnFilterSelectListener {
 
     var listener: FilterAdapter.OnFilterSelectListener? = null
@@ -32,7 +35,7 @@ class FilterDialog private constructor(
         setupBottomSheet()
     }
 
-    override fun onFilterSelect(filter: FilterAdapter.Filter) {
+    override fun onFilterSelect(filter: MediaFilter) {
         if (listener != null) {
             listener!!.onFilterSelect(filter)
         }
@@ -67,10 +70,8 @@ class FilterDialog private constructor(
         )
     }
 
-
     companion object {
-
-        fun newInstance(act: Activity, data: List<FilterAdapter.Filter>): FilterDialog {
+        fun newInstance(act: Activity, data: List<MediaFilter>): FilterDialog {
             return FilterDialog(act, data)
         }
     }

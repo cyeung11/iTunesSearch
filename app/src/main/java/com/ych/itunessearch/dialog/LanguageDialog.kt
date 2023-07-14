@@ -1,4 +1,4 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.dialog
 
 
 import android.app.Activity
@@ -8,6 +8,8 @@ import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.ych.itunessearch.R
+import com.ych.itunessearch.SharedPref
 import com.ych.itunessearch.databinding.DialogLangBinding
 import java.util.Locale
 

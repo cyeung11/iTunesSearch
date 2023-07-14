@@ -1,16 +1,16 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.adapter
 
 import android.app.Activity
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ych.itunessearch.databinding.ItemFilterBinding
+import com.ych.itunessearch.model.MediaFilter
 
 
 class FilterAdapter(
     act: Activity,
-    private val dataList: List<Filter>,
+    private val dataList: List<MediaFilter>,
     private val listener: OnFilterSelectListener
 ) : RecyclerView.Adapter<FilterAdapter.FilterViewHolder>() {
 
@@ -30,10 +30,10 @@ class FilterAdapter(
     }
 
     inner class FilterViewHolder(
-        val binding: ItemFilterBinding,
+        private val binding: ItemFilterBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        var filter: Filter? = null
+        var filter: MediaFilter? = null
 
         init {
             binding.container.setOnClickListener {
@@ -43,18 +43,13 @@ class FilterAdapter(
             }
         }
 
-        fun onBind(filter: Filter) {
+        fun onBind(filter: MediaFilter) {
             this.filter = filter
             binding.txtName.text = filter.getDisplayText()
         }
     }
 
-    interface Filter {
-        fun getDisplayText(): String
-        fun getRequestValue(): String
-    }
-
     interface OnFilterSelectListener{
-        fun onFilterSelect(filter: Filter)
+        fun onFilterSelect(filter: MediaFilter)
     }
 }

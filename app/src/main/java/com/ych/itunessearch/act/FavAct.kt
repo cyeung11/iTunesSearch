@@ -1,11 +1,13 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.act
 
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ych.itunessearch.database.ITunesItem
+import com.ych.itunessearch.adapter.FavAdapter
+import com.ych.itunessearch.act.vm.FavViewModel
+import com.ych.itunessearch.model.MediaItem
 import com.ych.itunessearch.databinding.ActFavBinding
 
 class FavAct : AppCompatActivity(), FavAdapter.RemoveFavDelegate {
@@ -35,7 +37,7 @@ class FavAct : AppCompatActivity(), FavAdapter.RemoveFavDelegate {
         }
     }
 
-    override fun removeFav(item: ITunesItem) {
+    override fun removeFav(item: MediaItem) {
         viewModel.removeFav(item)
     }
 

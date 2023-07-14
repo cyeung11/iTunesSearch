@@ -1,4 +1,4 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.act
 
 import android.content.Intent
 import android.os.Build
@@ -22,16 +22,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.google.android.material.navigation.NavigationView.OnNavigationItemSelectedListener
+import com.ych.itunessearch.adapter.FilterAdapter
+import com.ych.itunessearch.dialog.FilterDialog
+import com.ych.itunessearch.act.vm.HomeViewModel
+import com.ych.itunessearch.adapter.SearchResultAdapter
+import com.ych.itunessearch.dialog.LanguageDialog
+import com.ych.itunessearch.R
 import com.ych.itunessearch.databinding.ActHomeBinding
+import com.ych.itunessearch.model.MediaDetail
+import com.ych.itunessearch.model.MediaFilter
 import kotlinx.coroutines.launch
 
-class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
+class HomeAct : AppCompatActivity(), SearchResultAdapter.FavToggleDelegate {
 
     private lateinit var homeBinding: ActHomeBinding
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private val adapter: ItemAdapter by lazy { ItemAdapter(this, this) }
+    private val adapter: SearchResultAdapter by lazy { SearchResultAdapter(this, this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +47,12 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
 
         homeBinding = ActHomeBinding.inflate(layoutInflater)
         setContentView(homeBinding.root)
+
+        setupBody()
+        scheduleUiUpdate()
+    }
+
+    private fun setupBody() {
         setSupportActionBar(homeBinding.toolbar)
 
         val toggle = ActionBarDrawerToggle(this, homeBinding.drawerLayout, homeBinding.toolbar, 0, 0)
@@ -58,10 +72,10 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         })
 
         homeBinding.imgTypeFilterClear.setOnClickListener {
-            viewModel.filter(viewModel.uiState.value.country, null)
+            viewModel.search(mediaType = null)
         }
         homeBinding.imgCountryFilterClear.setOnClickListener {
-            viewModel.filter(null, viewModel.uiState.value.mediaType)
+            viewModel.search(country = null)
         }
 
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -69,42 +83,6 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         adapter.setHasStableIds(true)
         homeBinding.rvResult.adapter = adapter
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect {
-                    adapter.items = it.items
-                    adapter.isLoading = it.isLoading
-
-                    homeBinding.toolbar.title = if (it.query.isNullOrBlank())
-                        getString(R.string.app_name)
-                    else getString(R.string.result_for, it.query)
-
-                    if (it.mediaType == null) {
-                        homeBinding.imgTypeFilterClear.visibility = View.GONE
-                        homeBinding.txtMedia.setTextColor(ContextCompat.getColor(this@HomeAct, R.color.text_color))
-                        homeBinding.txtMedia.setText(R.string.media_type)
-                        homeBinding.llTypeFilter.setBackgroundResource(R.drawable.bg_border_rounded)
-                    } else {
-                        homeBinding.imgTypeFilterClear.visibility = View.VISIBLE
-                        homeBinding.txtMedia.setTextColor(ContextCompat.getColor(this@HomeAct, R.color.white))
-                        homeBinding.txtMedia.text = it.mediaType?.getDisplayText()
-                        homeBinding.llTypeFilter.setBackgroundResource(R.drawable.bg_grey_rounded)
-                    }
-
-                    if (it.country == null) {
-                        homeBinding.imgCountryFilterClear.visibility = View.GONE
-                        homeBinding.txtCountry.setTextColor(ContextCompat.getColor(this@HomeAct, R.color.text_color))
-                        homeBinding.txtCountry.setText(R.string.country)
-                        homeBinding.llCountryFilter.setBackgroundResource(R.drawable.bg_border_rounded)
-                    } else {
-                        homeBinding.imgCountryFilterClear.visibility = View.VISIBLE
-                        homeBinding.txtCountry.setTextColor(ContextCompat.getColor(this@HomeAct, R.color.white))
-                        homeBinding.txtCountry.text = it.country?.getDisplayText()
-                        homeBinding.llCountryFilter.setBackgroundResource(R.drawable.bg_grey_rounded)
-                    }
-                }
-            }
-        }
 
         homeBinding.rvResult.addOnScrollListener(object : OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -119,24 +97,71 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         })
 
         homeBinding.txtMedia.setOnClickListener {
-            val dialog = FilterDialog.newInstance(this, ItunesFilter.getTypeFilter(this))
-            dialog.listener = object : FilterAdapter.OnFilterSelectListener{
-                override fun onFilterSelect(filter: FilterAdapter.Filter) {
+            val dialog = FilterDialog.newInstance(this, MediaFilter.getTypeFilter(this))
+            dialog.listener = object : FilterAdapter.OnFilterSelectListener {
+                override fun onFilterSelect(filter: MediaFilter) {
                     dialog.dismiss()
-                    viewModel.filter(viewModel.uiState.value.country, filter)
+                    viewModel.search(mediaType = filter)
                 }
             }
             dialog.show()
         }
         homeBinding.txtCountry.setOnClickListener {
-            val dialog = FilterDialog.newInstance(this, ItunesFilter.getCountryFilters(this))
-            dialog.listener = object : FilterAdapter.OnFilterSelectListener{
-                override fun onFilterSelect(filter: FilterAdapter.Filter) {
+            val dialog = FilterDialog.newInstance(this, MediaFilter.getCountryFilters(this))
+            dialog.listener = object : FilterAdapter.OnFilterSelectListener {
+                override fun onFilterSelect(filter: MediaFilter) {
                     dialog.dismiss()
-                    viewModel.filter(filter, viewModel.uiState.value.mediaType)
+                    viewModel.search(country = filter)
                 }
             }
             dialog.show()
+        }
+    }
+
+    private fun scheduleUiUpdate() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect {
+                    adapter.items = it.items
+                    adapter.isLoading = it.isLoading
+
+                    homeBinding.toolbar.title = if (it.query.isNullOrBlank())
+                        getString(R.string.app_name)
+                    else getString(R.string.result_for, it.query)
+
+                    if (it.mediaType == null) {
+                        homeBinding.imgTypeFilterClear.visibility = View.GONE
+                        homeBinding.txtMedia.setTextColor(ContextCompat.getColor(this@HomeAct,
+                            R.color.text_color
+                        ))
+                        homeBinding.txtMedia.setText(R.string.media_type)
+                        homeBinding.llTypeFilter.setBackgroundResource(R.drawable.bg_border_rounded)
+                    } else {
+                        homeBinding.imgTypeFilterClear.visibility = View.VISIBLE
+                        homeBinding.txtMedia.setTextColor(ContextCompat.getColor(this@HomeAct,
+                            R.color.white
+                        ))
+                        homeBinding.txtMedia.text = it.mediaType?.getDisplayText()
+                        homeBinding.llTypeFilter.setBackgroundResource(R.drawable.bg_grey_rounded)
+                    }
+
+                    if (it.country == null) {
+                        homeBinding.imgCountryFilterClear.visibility = View.GONE
+                        homeBinding.txtCountry.setTextColor(ContextCompat.getColor(this@HomeAct,
+                            R.color.text_color
+                        ))
+                        homeBinding.txtCountry.setText(R.string.country)
+                        homeBinding.llCountryFilter.setBackgroundResource(R.drawable.bg_border_rounded)
+                    } else {
+                        homeBinding.imgCountryFilterClear.visibility = View.VISIBLE
+                        homeBinding.txtCountry.setTextColor(ContextCompat.getColor(this@HomeAct,
+                            R.color.white
+                        ))
+                        homeBinding.txtCountry.text = it.country?.getDisplayText()
+                        homeBinding.llCountryFilter.setBackgroundResource(R.drawable.bg_grey_rounded)
+                    }
+                }
+            }
         }
 
         viewModel.savedItemIds.observe(this) {
@@ -173,7 +198,7 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         searchView?.setOnQueryTextListener(object : OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null) {
-                    viewModel.search(query)
+                    viewModel.search(query = query)
                 }
                 searchItem?.collapseActionView()
                 return false
@@ -191,7 +216,7 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         setupVMLang()
     }
 
-    override fun toggleFavourite(item: ITunesDetail, wasFav: Boolean) {
+    override fun toggleFavourite(item: MediaDetail, wasFav: Boolean) {
         if (wasFav) {
             viewModel.removeFav(item)
         } else {
@@ -199,6 +224,7 @@ class HomeAct : AppCompatActivity(), ItemAdapter.FavToggleDelegate {
         }
     }
 
+    // Locale info is used by the VM during search call
     private fun setupVMLang() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             resources.configuration.locales.get(0)?.toLanguageTag()?.let {

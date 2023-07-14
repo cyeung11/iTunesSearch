@@ -1,8 +1,6 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.model
 
-import com.ych.itunessearch.database.ITunesItem
-
-data class ITunesDetail(
+data class MediaDetail(
     val artistId: Int,
     val artistName: String?,
     val artistViewUrl: String?,
@@ -27,7 +25,7 @@ data class ITunesDetail(
     val trackCensoredName: String?,
     val trackCount: Int,
     val trackExplicitness: String?,
-    val trackId: Int,
+    val trackId: Int, // this could be 0 for some item. Use collectionId instead if so
     val trackName: String?,
     val trackNumber: Int,
     val trackPrice: Double,
@@ -35,13 +33,17 @@ data class ITunesDetail(
     val trackViewUrl: String?,
     val wrapperType: String?
 ) {
-    fun toItem(): ITunesItem{
-        return ITunesItem(
+    fun toItem(): MediaItem {
+        return MediaItem(
             artistName = artistName,
-            artworkUrl100 = artworkUrl100,
-            collectionName = collectionName,
-            trackId = trackId,
-            trackName = trackName
+            artwork = artworkUrl100,
+            name = name,
+            id = id
         )
     }
+
+    val name: String?
+        get() =  if (trackName.isNullOrBlank()) collectionName else trackName
+    val id: Int
+        get() = if (trackId != 0) trackId else collectionId
 }

@@ -17,7 +17,7 @@
         android:theme="@style/Theme.ITunesSearch"
         android:localeConfig="@xml/locale_config">
 
-        <activity android:name=".HomeAct"
+        <activity android:name=".act.HomeAct"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".FavAct"/>
+        <activity android:name=".act.FavAct"/>
 
     </application>
 

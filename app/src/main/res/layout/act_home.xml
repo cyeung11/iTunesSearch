@@ -99,7 +99,7 @@
             android:id="@+id/rvResult"
             android:layout_weight="1"
             android:scrollbars="none"
-            tools:listitem="@layout/item_entry"
+            tools:listitem="@layout/item_media"
             tools:itemCount="10"
             android:background="@android:color/white"/>
 

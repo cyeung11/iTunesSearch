@@ -1,10 +1,12 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.act.vm
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.ych.itunessearch.database.AppDatabase
 import com.ych.itunessearch.http.RetrofitClient
+import com.ych.itunessearch.model.MediaDetail
+import com.ych.itunessearch.model.MediaFilter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,17 +22,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         database.favDao().getAllId()
     }
 
-    fun addToFav(entry: ITunesDetail) {
-
+    fun addToFav(media: MediaDetail) {
         CoroutineScope(Dispatchers.IO).launch {
-            database.favDao().insert(entry.toItem())
+            database.favDao().insert(media.toItem())
         }
     }
 
-    fun removeFav(entry: ITunesDetail) {
-
+    fun removeFav(media: MediaDetail) {
         CoroutineScope(Dispatchers.IO).launch {
-            database.favDao().delete(entry.toItem())
+            database.favDao().delete(media.toItem().id)
         }
     }
 
@@ -39,49 +39,30 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     data class HomeState(
         var isLoading: Boolean = false,
         var query: String? = null,
-        var items: ArrayList<ITunesDetail> = arrayListOf(),
+        var items: ArrayList<MediaDetail> = arrayListOf(),
         var lang: String = "en",
-        var country: FilterAdapter.Filter? = null,
-        var mediaType: FilterAdapter.Filter? = null
+        var country: MediaFilter? = null,
+        var mediaType: MediaFilter? = null
     )
 
     fun changeLang(lang: String) {
         if (lang != _uiState.value.lang) {
             _uiState.update { it.copy(lang = lang) }
             _uiState.value.query?.let {
-                search(it)
+                search(query = it)
             }
         }
     }
 
-    fun search(query: String) {
-        _uiState.update { it.copy(isLoading = true, query = query, items = arrayListOf()) }
-        CoroutineScope(Dispatchers.IO).launch {
-            val queryMap = HashMap<String, Any>()
-            queryMap["term"] = query
-            queryMap["lang"] = _uiState.value.lang
-            if (_uiState.value.country != null) {
-                queryMap["country"] = _uiState.value.country!!.getRequestValue()
-            }
-            if (_uiState.value.mediaType != null) {
-                queryMap["media"] = _uiState.value.mediaType!!.getRequestValue()
-            }
-            queryMap["limit"] = 20
-
-            val response = RetrofitClient.getApi().getPage(queryMap)
-
-            _uiState.update {
-                it.copy(isLoading = false, items = ArrayList(response.results ?: listOf()))
-            }
-        }
-    }
-
-    fun filter(country: FilterAdapter.Filter?, mediaType: FilterAdapter.Filter?) {
-        if (!_uiState.value.query.isNullOrBlank()) {
-            _uiState.update { it.copy(isLoading = true, country = country, mediaType = mediaType, items = arrayListOf()) }
+    // Reset the previous search items
+    fun search(query: String? = _uiState.value.query,
+               country: MediaFilter? = _uiState.value.country,
+               mediaType: MediaFilter? = _uiState.value.mediaType) {
+        if (!query.isNullOrBlank()) {
+            _uiState.update { it.copy(isLoading = true, query = query, country = country, mediaType = mediaType, items = arrayListOf()) }
             CoroutineScope(Dispatchers.IO).launch {
                 val queryMap = HashMap<String, Any>()
-                queryMap["term"] = _uiState.value.query!!
+                queryMap["term"] = query
                 queryMap["lang"] = _uiState.value.lang
                 if (country != null) {
                     queryMap["country"] = country.getRequestValue()
@@ -112,6 +93,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     val size = _uiState.value.items.size
                     queryMap["term"] = _uiState.value.query ?: ""
                     queryMap["lang"] = _uiState.value.lang
+                    if (_uiState.value.country != null) {
+                        queryMap["country"] = _uiState.value.country!!.getRequestValue()
+                    }
+                    if (_uiState.value.mediaType != null) {
+                        queryMap["media"] = _uiState.value.mediaType!!.getRequestValue()
+                    }
                     queryMap["offset"] = size
                     queryMap["limit"] = 20
 

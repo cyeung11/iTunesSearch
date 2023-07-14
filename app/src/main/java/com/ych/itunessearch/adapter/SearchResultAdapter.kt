@@ -1,5 +1,6 @@
-package com.ych.itunessearch
+package com.ych.itunessearch.adapter
 
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,25 +8,29 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
-import com.ych.itunessearch.databinding.ItemEntryBinding
+import com.ych.itunessearch.R
+import com.ych.itunessearch.databinding.ItemMediaBinding
 import com.ych.itunessearch.databinding.ItemLoadingBinding
+import com.ych.itunessearch.model.MediaDetail
 
-class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
+class SearchResultAdapter(act: Activity, private val favDelegate: FavToggleDelegate) :
     RecyclerView.Adapter<ViewHolder>() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(act)
 
+    // List of track ids that was saved as favorites
     var favIds = listOf<Int>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
-    var items = listOf<ITunesDetail>()
+    var items = listOf<MediaDetail>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
+    // When true, add a loading view on the bottom of the list
     var isLoading = false
         set(value) {
             if (field != value) {
@@ -39,9 +44,9 @@ class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
         }
 
     inner class LoadingHolder(binding: ItemLoadingBinding): ViewHolder(binding.root)
-    inner class EntityHolder(private val binding: ItemEntryBinding) : ViewHolder(binding.root), View.OnClickListener {
+    inner class MediaHolder(private val binding: ItemMediaBinding) : ViewHolder(binding.root), View.OnClickListener {
 
-        var item: ITunesDetail? = null
+        var item: MediaDetail? = null
 
         init {
             binding.btnFav.setOnClickListener(this)
@@ -49,18 +54,18 @@ class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
 
         override fun onClick(v: View) {
             if (item != null) {
-                delegate.toggleFavourite(item!!, favIds.contains(item!!.trackId))
+                favDelegate.toggleFavourite(item!!, favIds.contains(item!!.id))
             }
         }
 
-        fun bind(entity: ITunesDetail) {
-            this.item = entity
-            binding.txtName.text = entity.trackName ?: entity.collectionName
-            binding.txtArtist.text = entity.artistName
-            Glide.with(binding.imgPhoto).load(entity.artworkUrl100).into(binding.imgPhoto)
+        fun bind(media: MediaDetail) {
+            this.item = media
+            binding.txtName.text = media.name
+            binding.txtArtist.text = media.artistName
+            Glide.with(binding.imgPhoto).load(media.artworkUrl100).into(binding.imgPhoto)
 
             binding.btnFav.setImageResource(
-                if (favIds.contains(entity.trackId)) R.drawable.btn_fav else R.drawable.btn_unfav
+                if (favIds.contains(media.id)) R.drawable.btn_fav else R.drawable.btn_unfav
             )
         }
     }
@@ -74,12 +79,12 @@ class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
             )
             LoadingHolder(binding)
         } else {
-            val binding = ItemEntryBinding.inflate(layoutInflater)
+            val binding = ItemMediaBinding.inflate(layoutInflater)
             binding.root.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            EntityHolder(binding)
+            MediaHolder(binding)
         }
     }
 
@@ -88,7 +93,7 @@ class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (position < items.size && holder is EntityHolder) {
+        if (position < items.size && holder is MediaHolder) {
             holder.bind(items[position])
         }
     }
@@ -99,13 +104,13 @@ class ItemAdapter(act: HomeAct, private val delegate: FavToggleDelegate) :
 
     override fun getItemId(position: Int): Long {
         if (position < items.size) {
-            return items[position].trackId.toLong()
+            return items[position].id.toLong()
         } else {
             return -1
         }
     }
 
     interface FavToggleDelegate {
-        fun toggleFavourite(item: ITunesDetail, wasFav: Boolean)
+        fun toggleFavourite(item: MediaDetail, wasFav: Boolean)
     }
 }

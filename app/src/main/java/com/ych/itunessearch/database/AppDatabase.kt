@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.ych.itunessearch.model.MediaItem
 
-@Database(entities = [ITunesItem::class], version = 1)
+@Database(entities = [MediaItem::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favDao(): ItemDao
 

@@ -4,19 +4,21 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.ych.itunessearch.model.MediaItem
 
 @Dao
 interface ItemDao {
-    @Query("SELECT * FROM itunesitem")
-    fun getAll(): LiveData<List<ITunesItem>>
+    @Query("SELECT * FROM mediaitem")
+    fun getAll(): LiveData<List<MediaItem>>
 
-    @Query("SELECT track_id FROM itunesitem")
+    @Query("SELECT id FROM mediaitem")
     fun getAllId(): LiveData<List<Int>>
 
-    @Insert
-    fun insert(item: ITunesItem)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(item: MediaItem)
 
-    @Delete
-    fun delete(item: ITunesItem)
+    @Query("DELETE FROM mediaitem where id = :id")
+    fun delete(id: Int)
 }
