@@ -2,6 +2,7 @@ package com.ych.itunessearch.act
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +35,14 @@ class FavAct : AppCompatActivity(), FavAdapter.RemoveFavDelegate {
 
         viewModel.savedItems.observe(this) {
             adapter.items = it
+
+            if (it.isEmpty()) {
+                favBinding.txtEmpty.visibility = View.VISIBLE
+                favBinding.rvList.visibility = View.GONE
+            } else {
+                favBinding.txtEmpty.visibility = View.GONE
+                favBinding.rvList.visibility = View.VISIBLE
+            }
         }
     }
 

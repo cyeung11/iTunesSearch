@@ -1,4 +1,22 @@
 <resources>
     <string name="app_name">iTunes搜尋</string>
-    <string name="select_language">選揀語言</string>
+
+    <string name="search">搜尋</string>
+    <string name="fav">書籤</string>
+    <string name="lang">語言</string>
+    <string name="filter">篩選</string>
+
+    <string name="select_language">選擇語言</string>
+    <string name="loading">載入中</string>
+    <string name="result_for">\'%s\'搜尋結果</string>
+    <string name="country">國家</string>
+
+    <string name="media_type">種類</string>
+    <string name="media_type_movie">電影</string>
+    <string name="media_type_podcast">廣播</string>
+    <string name="media_type_music">音樂</string>
+    <string name="media_type_audio_book">語音書本</string>
+    <string name="media_type_tv">電視</string>
+    <string name="no_saved_item">暫時未有書籤</string>
+
 </resources>
