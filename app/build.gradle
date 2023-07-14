@@ -18,12 +18,28 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        def propsFile = file('../signing.properties')
+        def props = new Properties()
+        props.load(new FileInputStream(propsFile))
+
+        config {
+            storeFile = file(props['store'])
+            storePassword = props['storePass']
+            keyAlias = props['alias']
+            keyPassword = props['pass']
+
+        }
+    }
+
     buildFeatures {
         viewBinding true
     }
 
     buildTypes {
         release {
+            signingConfig signingConfigs.config
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
